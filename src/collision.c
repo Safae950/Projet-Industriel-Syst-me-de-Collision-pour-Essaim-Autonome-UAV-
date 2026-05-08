@@ -1,7 +1,6 @@
 /**
  * ============================================================
  * SYSTÈME DE DÉTECTION DE COLLISION — ESSAIM UAV
- * École des Sciences de l'Information | Pr. Tarik HOUICHIME
  * ============================================================
  *
  * Objectif : Identifier en O(n log n) les deux drones les plus
