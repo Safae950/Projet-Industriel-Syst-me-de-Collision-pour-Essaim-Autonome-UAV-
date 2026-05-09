@@ -37,12 +37,13 @@ une constante indépendante de n. La boucle interne ne fait donc que quelques it
 moyenne. La complexité de cette phase est O(n) en moyenne. 
          
          2. Complexité globale : 
-Fonction                  Complexité 
-malloc / free                 O(1)   
-generer_essaim                O(n)    
-quicksort_x                O(n log n)
-trouver_paire_proche     O(n) en moyenne 
-Total                      O(n log n) 
+| Fonction               | Complexité             |
+|------------------------|------------------------|
+| `malloc` / `free`      | O(1)                   |
+| `generer_essaim`       | O(n)                   |
+| `quicksort_x`          | O(n log n)             |
+| `trouver_paire_proche` | O(n) en moyenne        |
+| **Total**              | **O(n log n)**         |
 La complexité globale du système est donc O(n log n), dominée par le tri QuickSort. 
 
         3. Preuve que l'architecture évite le timeout : 
