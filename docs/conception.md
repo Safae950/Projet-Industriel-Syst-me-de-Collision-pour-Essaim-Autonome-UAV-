@@ -1,9 +1,11 @@
       Dossier de Conception Technique : 
+    
     Introduction : 
 Dans ce dossier, je vais expliquer les choix que j'ai fait pour concevoir ce système de 
 détection de collision. Mon objectif principal était de respecter les contraintes imposées (pas 
 de crochets, arithmétique de pointeurs pure) tout en obtenant un programme rapide et sûr. 
-      1. Comment j'ai organisé la mémoire ? 
+
+    1. Comment j'ai organisé la mémoire ? 
 La première chose que j'ai décidée, c'est d'allouer tous les drones d'un seul coup dans un bloc 
 mémoire unique : 
 Drone *essaim = (Drone *)malloc(N * sizeof(Drone)); 
@@ -13,6 +15,7 @@ pointeurs. Avec un bloc contigu, je sais exactement où se trouve le drone numé
 de déplacer le pointeur de base de i positions. 
 Concrètement, le bloc fait 200 000 octets en mémoire (10 000 drones × 20 octets chacun : 4 
 pour id, 4 pour x, 4 pour y, 4 pour z). 
+      
        2. La navigation sans crochets : 
 C'est la contrainte la plus particulière du projet. Partout dans le code, au lieu d'écrire 
 essaim[i].x, j'écris (essaim + i)->x. Ces deux écritures produisent exactement le même 
@@ -24,6 +27,7 @@ d->id = i + 1;
 d->x  = ((float)rand() / RAND_MAX) * 1000.0f; 
 À chaque tour de boucle, d pointe sur le drone i. J'accède ensuite à ses champs avec -> sans 
 jamais utiliser de crochets. 
+      
       3. Pourquoi j'ai choisi de trier sur l'axe X 
 L'idée de trier les drones avant de chercher la paire la plus proche vient d'une observation 
 simple : si deux drones sont très proches en distance 3D, ils sont forcément proches aussi sur 
@@ -36,6 +40,7 @@ suivants seraient encore plus loin, inutile d'aller plus loin.
 C'est ce que fait ce break dans la boucle : 
 float dx = dj->x - di->x; 
 if (dx * dx >= min_dist2) break; 
+      
       4. Le tri : QuickSort avec partition de Lomuto : 
 Pour trier, j'ai implémenté un QuickSort récursif. J'ai choisi la partition de Lomuto car elle est 
 simple à coder sans indices tableau. Le pivot est toujours le dernier élément du segment : 
@@ -47,6 +52,7 @@ Drone tmp = *a;
 *b = tmp; 
 Ce point est important : ce sont les structures complètes qui se déplacent dans le bloc 
 mémoire, pas des pointeurs. Après le tri, le bloc reste contigu et cohérent. 
+      
       5. Le calcul de distance : pourquoi je n'utilise pas sqrt dans la boucle : 
 Dans la fonction dist2, je retourne la distance au carré : 
 return dx*dx + dy*dy + dz*dz; 
@@ -58,6 +64,7 @@ return sqrtf(min_dist2);
 Sur un processeur embarqué, sqrtf est une opération relativement coûteuse. Éviter de 
 l'appeler dans une boucle qui tourne des millions de fois représente un gain de temps réel non 
 négligeable. 
+     
      6. Un détail important sur les identifiants 
 Lors de la génération, j'initialise les identifiants à i + 1 (base 1) : 
 d->id = i + 1; 
@@ -67,6 +74,7 @@ position du drone dont l'id est id_a, j'écris :
 (essaim + id_a - 1)->x 
 Le -1 vient du fait que l'id commence à 1 mais le tableau commence à 0. C'est un point subtil 
 que j'ai dû faire attention à ne pas oublier lors de l'affichage. 
+     
      7. Sécurité et gestion mémoire : 
 J'ai ajouté une vérification après malloc pour éviter un crash silencieux si la mémoire est 
 insuffisante : 
@@ -78,6 +86,7 @@ Et à la fin du programme, je libère le bloc et je mets le pointeur à NULL pou
 à une zone mémoire libérée : 
 free(essaim); 
 essaim = NULL; 
+      
       Conclusion : 
 Les choix que j'ai faits «  bloc contigu, tri QuickSort sur X, fenêtre glissante, distance au 
 carré»forment un ensemble cohérent qui répond aux deux exigences du cahier des charges : 
